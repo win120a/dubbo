@@ -307,6 +307,15 @@ jobs:
   error-code-inspecting:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/cache@v3
+        name: "Read Local Maven Repository Cache"
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            ${{ runner.os }}-maven-
+            
       - uses: actions/checkout@v3
         with:
           path: "./dubbo"
