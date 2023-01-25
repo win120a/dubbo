@@ -200,6 +200,12 @@
             <version>1.15.3</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-annotation-processor</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
