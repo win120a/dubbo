@@ -28,8 +28,8 @@
     <artifactId>dubbo-demo-spring-boot-consumer</artifactId>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
         <spring-boot.version>2.3.1.RELEASE</spring-boot.version>
         <skip_maven_deploy>true</skip_maven_deploy>
