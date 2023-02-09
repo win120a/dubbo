@@ -90,6 +90,11 @@ public interface LoggerCodeConstants {
 
     String COMMON_ISOLATED_EXECUTOR_CONFIGURATION_ERROR = "0-27";
 
+    /**
+     * Used in annotation processor to indicate a deprecated method is invoked.
+     */
+    String COMMON_DEPRECATED_METHOD_INVOKED = "0-99";
+
     // Registry module
 
     String REGISTRY_ADDRESS_INVALID = "1-1";
