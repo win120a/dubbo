@@ -17,14 +17,20 @@
 
 package org.apache.dubbo.annotation;
 
+import org.apache.dubbo.annotation.permit.Permit;
+
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.api.JavacTrees;
+import com.sun.tools.javac.file.JavacFileManager;
+import com.sun.tools.javac.processing.JavacFiler;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Names;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.tools.JavaFileManager;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -38,6 +44,10 @@ public class AnnotationProcessorContext {
     private Names names;
     private Context javacContext;
     private Trees trees;
+
+    private JavacFiler javacFiler;
+
+    private JavacFileManager javacFileManager;
 
     private AnnotationProcessorContext() { }
 
@@ -72,7 +82,29 @@ public class AnnotationProcessorContext {
 
         apContext.trees = Trees.instance(jcProcessingEnvironment);
 
+        Object tempFiler = jcProcessingEnvironment.getFiler();
+        apContext.javacFiler = (JavacFiler) (tempFiler.getClass() == JavacFiler.class ?
+            tempFiler : jbUnwrap(JavacFiler.class, tempFiler));
+
+        Object tempFM = context.get(JavaFileManager.class);
+        apContext.javacFileManager = unwrapFileManager(tempFM);
+
         return apContext;
+    }
+
+    private static JavacFileManager unwrapFileManager(Object wrappedFileManager) {
+        try {
+            Class wrappedJFMClass = Class.forName("com.sun.tools.javac.api.ClientCodeWrapper$WrappedJavaFileManager");
+            Field ideaWrappedJFMField = Permit.getField(wrappedJFMClass, "clientJavaFileManager");
+
+            Object tempJFM = ideaWrappedJFMField.get(wrappedFileManager);
+
+            return (JavacFileManager) (tempJFM.getClass() == JavacFileManager.class ?
+                tempJFM : jbUnwrap(JavacFileManager.class, tempJFM));
+
+        } catch (ClassNotFoundException | IllegalAccessException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Auto-generated methods.
@@ -99,6 +131,14 @@ public class AnnotationProcessorContext {
 
     public JavacProcessingEnvironment getJavacProcessingEnvironment() {
         return javacProcessingEnvironment;
+    }
+
+    public JavacFiler getJavacFiler() {
+        return javacFiler;
+    }
+
+    public JavacFileManager getJavacFileManager() {
+        return javacFileManager;
     }
 
     @Override
