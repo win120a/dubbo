@@ -60,6 +60,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/dubbo
           ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean install -DskipTests=true -DskipIntegrationTests=true -Dcheckstyle.skip=true -Dcheckstyle_unix.skip=true -Drat.skip=true -Dmaven.javadoc.skip=true
+          rm -rf .git/
 
       - name: "Compress compiled project"
         run: |
@@ -388,11 +389,22 @@ jobs:
         uses: codecov/codecov-action@v3
 
   error-code-inspecting:
+    needs: [ shared-build ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           path: "./dubbo"
+
+      - name: "Download shared build result"
+        uses: actions/download-artifact@v3
+        with:
+          name: dubbo-shared-build-jdk17
+          path: ${{ github.workspace }}
+
+      - name: "Unzip shared build result"
+        run: |
+          unzip -o ${{ github.workspace }}/dubbo-shared-build-jdk17.zip
 
       - uses: actions/checkout@v3
         with:
@@ -406,10 +418,6 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-      - name: "Compile Dubbo (Linux)"
-        run: |
-          cd ${{ github.workspace }}/dubbo
-          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean install -DskipTests=true -DskipIntegrationTests=true -Dcheckstyle.skip=true -Dcheckstyle_unix.skip=true -Drat.skip=true -Dmaven.javadoc.skip=true
       - name: "Run Error Code Inspecting"
         env:
           DUBBO_ECI_REPORT_AS_ERROR: true
