@@ -376,10 +376,17 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
+      - name: "Deploy mvnd"
+        run: |
+          wget https://github.com/apache/maven-mvnd/releases/download/0.9.0/maven-mvnd-0.9.0-linux-amd64.zip
+          unzip maven-mvnd-0.9.0-linux-amd64.zip
+          mv maven-mvnd-0.9.0-linux-amd64/ mvnd/
+
       - name: "Compile Dubbo (Linux)"
         run: |
           cd ${{ github.workspace }}/dubbo
-          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean install -DskipTests=true -DskipIntegrationTests=true -Dcheckstyle.skip=true -Dcheckstyle_unix.skip=true -Drat.skip=true -Dmaven.javadoc.skip=true
+          ${{ github.workspace }}/mvnd/bin/mvnd --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean install -DskipTests=true -DskipIntegrationTests=true -Dcheckstyle.skip=true -Dcheckstyle_unix.skip=true -Drat.skip=true -Dmaven.javadoc.skip=true
+          
       - name: "Run Error Code Inspecting"
         env:
           DUBBO_ECI_REPORT_AS_ERROR: true
