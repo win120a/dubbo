@@ -66,12 +66,19 @@ jobs:
         run: |
           cd ${{ github.workspace }}
           7z a dubbo-shared-build-jdk17.zip dubbo/ -r
+          7z a dubbo-shared-build-jdk17.7z dubbo/ -r
 
       - name: "Upload compiled result"
         uses: actions/upload-artifact@v3
         with:
           name: "dubbo-shared-build-jdk17"
           path: ${{ github.workspace }}/dubbo-shared-build-jdk17.zip
+
+      - name: "Upload compiled result (7z)"
+        uses: actions/upload-artifact@v3
+        with:
+          name: "dubbo-shared-build-jdk17-7z"
+          path: ${{ github.workspace }}/dubbo-shared-build-jdk17.7z
 
 
   build-source:
@@ -392,10 +399,6 @@ jobs:
     needs: [ shared-build ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          path: "./dubbo"
-
       - name: "Download shared build result"
         uses: actions/download-artifact@v3
         with:
