@@ -23,17 +23,12 @@ import org.apache.dubbo.common.extension.ExtensionDirector;
 import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -286,55 +281,6 @@ public class ConfigUtils {
         }
 
         return properties;
-    }
-
-    public static String loadMigrationRule(Set<ClassLoader> classLoaders, String fileName) {
-        String rawRule = "";
-        if (checkFileNameExist(fileName)) {
-            try {
-                try (FileInputStream input = new FileInputStream(fileName)) {
-                    return readString(input);
-                }
-            } catch (Throwable e) {
-                logger.warn(COMMON_IO_EXCEPTION, "", "", "Failed to load " + fileName + " file from " + fileName + "(ignore this file): " + e.getMessage(), e);
-            }
-        }
-
-        try {
-            List<ClassLoader> classLoadersToLoad = new LinkedList<>();
-            classLoadersToLoad.add(ClassUtils.getClassLoader());
-            classLoadersToLoad.addAll(classLoaders);
-            for (Set<URL> urls : ClassLoaderResourceLoader.loadResources(fileName, classLoadersToLoad).values()) {
-                for (URL url : urls) {
-                    InputStream is = url.openStream();
-                    if (is != null) {
-                        return readString(is);
-                    }
-                }
-            }
-        } catch (Throwable e) {
-            logger.warn(COMMON_IO_EXCEPTION, "", "", "Failed to load " + fileName + " file from " + fileName + "(ignore this file): " + e.getMessage(), e);
-        }
-        return rawRule;
-    }
-
-    private static String readString(InputStream is) {
-        StringBuilder stringBuilder = new StringBuilder();
-        char[] buffer = new char[10];
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                if (n < 10) {
-                    buffer = Arrays.copyOf(buffer, n);
-                }
-                stringBuilder.append(String.valueOf(buffer));
-                buffer = new char[10];
-            }
-        } catch (IOException e) {
-            logger.error(COMMON_IO_EXCEPTION, "", "", "Read migration file error.", e);
-        }
-
-        return stringBuilder.toString();
     }
 
     /**

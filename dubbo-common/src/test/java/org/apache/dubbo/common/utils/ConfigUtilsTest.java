@@ -29,10 +29,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -276,13 +274,5 @@ class ConfigUtilsTest {
         expected.put("dubbo.parameters", "[{a:b},{c_.d: r*}]");
 
         assertEquals(expected, p);
-    }
-
-    @Test
-    void testLoadMigrationRule() {
-        Set<ClassLoader> classLoaderSet = new HashSet<>();
-        classLoaderSet.add(ClassUtils.getClassLoader());
-        String rule = ConfigUtils.loadMigrationRule(classLoaderSet, "dubbo-migration.yaml");
-        Assertions.assertNotNull(rule);
     }
 }

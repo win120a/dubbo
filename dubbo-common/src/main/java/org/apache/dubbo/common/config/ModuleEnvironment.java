@@ -132,12 +132,6 @@ public class ModuleEnvironment extends Environment implements ModuleExt {
 
     @Override
     @DisableInject
-    public void setLocalMigrationRule(String localMigrationRule) {
-        applicationDelegate.setLocalMigrationRule(localMigrationRule);
-    }
-
-    @Override
-    @DisableInject
     public void setExternalConfigMap(Map<String, String> externalConfiguration) {
         applicationDelegate.setExternalConfigMap(externalConfiguration);
     }
@@ -212,11 +206,6 @@ public class ModuleEnvironment extends Environment implements ModuleExt {
     @Override
     public InmemoryConfiguration getAppConfiguration() {
         return applicationDelegate.getAppConfiguration();
-    }
-
-    @Override
-    public String getLocalMigrationRule() {
-        return applicationDelegate.getLocalMigrationRule();
     }
 
     @Override

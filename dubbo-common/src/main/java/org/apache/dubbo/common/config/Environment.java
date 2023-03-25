@@ -17,14 +17,12 @@
 package org.apache.dubbo.common.config;
 
 import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
-import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.context.ApplicationExt;
 import org.apache.dubbo.common.context.LifecycleAdapter;
 import org.apache.dubbo.common.extension.DisableInject;
 import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.ConfigUtils;
-import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.config.AbstractConfig;
 import org.apache.dubbo.config.context.ConfigConfigurationAdapter;
 import org.apache.dubbo.rpc.model.ScopeModel;
@@ -68,8 +66,6 @@ public class Environment extends LifecycleAdapter implements ApplicationExt {
 
     private DynamicConfiguration defaultDynamicConfiguration;
 
-    private String localMigrationRule;
-
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private final ScopeModel scopeModel;
 
@@ -86,37 +82,7 @@ public class Environment extends LifecycleAdapter implements ApplicationExt {
             this.externalConfiguration = new InmemoryConfiguration("ExternalConfig");
             this.appExternalConfiguration = new InmemoryConfiguration("AppExternalConfig");
             this.appConfiguration = new InmemoryConfiguration("AppConfig");
-
-            loadMigrationRule();
         }
-    }
-
-    /**
-     * @deprecated MigrationRule will be removed in 3.1
-     */
-    @Deprecated
-    private void loadMigrationRule() {
-        if (Boolean.parseBoolean(System.getProperty(CommonConstants.DUBBO_MIGRATION_FILE_ENABLE, "false"))) {
-            String path = System.getProperty(CommonConstants.DUBBO_MIGRATION_KEY);
-            if (StringUtils.isEmpty(path)) {
-                path = System.getenv(CommonConstants.DUBBO_MIGRATION_KEY);
-                if (StringUtils.isEmpty(path)) {
-                    path = CommonConstants.DEFAULT_DUBBO_MIGRATION_FILE;
-                }
-            }
-            this.localMigrationRule = ConfigUtils.loadMigrationRule(scopeModel.getClassLoaders(), path);
-        } else {
-            this.localMigrationRule = null;
-        }
-    }
-
-    /**
-     * @deprecated only for ut
-     */
-    @Deprecated
-    @DisableInject
-    public void setLocalMigrationRule(String localMigrationRule) {
-        this.localMigrationRule = localMigrationRule;
     }
 
     @DisableInject
@@ -311,13 +277,8 @@ public class Environment extends LifecycleAdapter implements ApplicationExt {
         return appConfiguration;
     }
 
-    public String getLocalMigrationRule() {
-        return localMigrationRule;
-    }
-
     public synchronized void refreshClassLoaders() {
         propertiesConfiguration.refresh();
-        loadMigrationRule();
         this.globalConfiguration = null;
         this.globalConfigurationMaps = null;
         this.defaultDynamicGlobalConfiguration = null;
