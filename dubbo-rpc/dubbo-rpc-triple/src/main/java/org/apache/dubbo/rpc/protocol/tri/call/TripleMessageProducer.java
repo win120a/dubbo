@@ -15,17 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.metrics.metadata.event;
+package org.apache.dubbo.rpc.protocol.tri.call;
 
-import org.apache.dubbo.metrics.event.SimpleMetricsEventMulticaster;
+import org.apache.dubbo.common.function.ThrowableSupplier;
 
-public final class MetadataMetricsEventMulticaster extends SimpleMetricsEventMulticaster {
 
-    public MetadataMetricsEventMulticaster() {
-        super.addListener(new MetricsPushListener());
-        super.addListener(new MetricsSubscribeListener());
-        super.addListener(new StoreProviderMetadataListener());
-        setAvailable();
+class TripleMessageProducer implements ClientCall.MessageProducer {
+
+    private final ThrowableSupplier<Object> throwableSupplier;
+
+    private TripleMessageProducer(ThrowableSupplier<Object> throwableSupplier) {
+        this.throwableSupplier = throwableSupplier;
     }
 
+    @Override
+    public Object getMessage() throws Throwable {
+        return throwableSupplier.get();
+    }
+
+    public static TripleMessageProducer withSupplier(ThrowableSupplier<Object> supplier) {
+        return new TripleMessageProducer(supplier);
+    }
 }

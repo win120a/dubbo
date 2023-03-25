@@ -14,18 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.dubbo.common.function;
 
-package org.apache.dubbo.metrics.metadata.event;
+public interface ThrowableSupplier<T> {
 
-import org.apache.dubbo.metrics.event.SimpleMetricsEventMulticaster;
-
-public final class MetadataMetricsEventMulticaster extends SimpleMetricsEventMulticaster {
-
-    public MetadataMetricsEventMulticaster() {
-        super.addListener(new MetricsPushListener());
-        super.addListener(new MetricsSubscribeListener());
-        super.addListener(new StoreProviderMetadataListener());
-        setAvailable();
-    }
-
+    /**
+     * Gets a result.
+     *
+     * @return a result
+     */
+    T get() throws Throwable;
 }

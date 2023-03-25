@@ -15,17 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.metrics.metadata.event;
+package org.apache.dubbo.rpc.protocol.dubbo;
 
-import org.apache.dubbo.metrics.event.SimpleMetricsEventMulticaster;
+import org.apache.dubbo.common.extension.SPI;
+import org.apache.dubbo.remoting.Channel;
+import org.apache.dubbo.remoting.exchange.Request;
 
-public final class MetadataMetricsEventMulticaster extends SimpleMetricsEventMulticaster {
+import java.io.InputStream;
 
-    public MetadataMetricsEventMulticaster() {
-        super.addListener(new MetricsPushListener());
-        super.addListener(new MetricsSubscribeListener());
-        super.addListener(new StoreProviderMetadataListener());
-        setAvailable();
-    }
+import static org.apache.dubbo.common.extension.ExtensionScope.FRAMEWORK;
 
+/**
+ * Extension of Byte Accessor, holding attributes as RpcInvocation objects
+ * so that the decoded service can be used more flexibly
+ * @since 3.2.0
+ */
+@SPI(scope = FRAMEWORK)
+public interface ByteAccessor {
+
+    /**
+     *  Get an enhanced DecodeableRpcInvocation subclass to allow custom decode.
+     *  The parameters are the same as {@link DecodeableRpcInvocation}
+     */
+    DecodeableRpcInvocation getRpcInvocation(Channel channel, Request req, InputStream is, byte proto);
 }

@@ -15,17 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.metrics.metadata.event;
+package org.apache.dubbo.metrics.exception;
 
-import org.apache.dubbo.metrics.event.SimpleMetricsEventMulticaster;
+public class MetricsException extends RuntimeException {
 
-public final class MetadataMetricsEventMulticaster extends SimpleMetricsEventMulticaster {
-
-    public MetadataMetricsEventMulticaster() {
-        super.addListener(new MetricsPushListener());
-        super.addListener(new MetricsSubscribeListener());
-        super.addListener(new StoreProviderMetadataListener());
-        setAvailable();
+    public MetricsException(String message) {
+        super(message);
     }
-
 }
