@@ -14,24 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.dubbo.rpc.executor;
 
-package org.apache.dubbo.metrics.metrics.event;
+import java.util.concurrent.Executor;
 
-import org.apache.dubbo.metrics.event.MetricsEvent;
-import org.apache.dubbo.metrics.event.RequestEvent;
-import org.apache.dubbo.metrics.model.MethodMetric;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-class RequestEventTest {
-
-    @Test
-    void testNewEvent() {
-        MethodMetric metric = new MethodMetric();
-        MetricsEvent.Type type = MetricsEvent.Type.TOTAL;
-        RequestEvent event = new RequestEvent(metric, type);
-
-        Assertions.assertEquals(event.getSource(), metric);
-        Assertions.assertEquals(event.getType(), type);
+public class Mock2ExecutorSupport implements ExecutorSupport {
+    @Override
+    public Executor getExecutor(Object data) {
+        return null;
     }
 }

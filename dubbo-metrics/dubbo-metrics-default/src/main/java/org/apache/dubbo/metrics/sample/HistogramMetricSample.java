@@ -15,26 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.metrics.event;
+package org.apache.dubbo.metrics.sample;
 
-/**
- * RequestEvent.
- */
-public class RequestEvent extends MetricsEvent {
-    private Type type;
+import org.apache.dubbo.metrics.model.MetricsCategory;
+import org.apache.dubbo.metrics.model.sample.MetricSample;
 
-    public RequestEvent(Object source, Type type) {
-        super(source);
-        this.type = type;
+import java.util.Map;
+
+public class HistogramMetricSample extends MetricSample {
+
+    public HistogramMetricSample(String name, String description, Map<String, String> tags, MetricsCategory category) {
+        super(name, description, tags, Type.TIMER, category);
     }
 
-    public Type getType() {
-        return type;
+    public HistogramMetricSample(String name, String description, Map<String, String> tags, Type type, MetricsCategory category, String baseUnit) {
+        super(name, description, tags, type, category, baseUnit);
     }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
-
-
 }

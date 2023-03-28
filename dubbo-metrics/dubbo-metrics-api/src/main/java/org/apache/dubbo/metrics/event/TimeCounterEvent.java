@@ -15,25 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.rpc.protocol.tri.call;
+package org.apache.dubbo.metrics.event;
 
-import org.apache.dubbo.common.function.ThrowableSupplier;
+import org.apache.dubbo.metrics.model.TimePair;
+import org.apache.dubbo.rpc.model.ApplicationModel;
 
+/**
+ * Mark certain types of events, allow automatic recording of start and end times, and provide time pairs
+ */
+public abstract class TimeCounterEvent extends MetricsEvent {
 
-class TripleMessageProducer implements ClientCall.MessageProducer {
+    private final TimePair timePair;
 
-    private final ThrowableSupplier<Object> throwableSupplier;
-
-    private TripleMessageProducer(ThrowableSupplier<Object> throwableSupplier) {
-        this.throwableSupplier = throwableSupplier;
+    public TimeCounterEvent(ApplicationModel source) {
+        super(source);
+        this.timePair = TimePair.start();
     }
 
-    @Override
-    public Object getMessage() throws Throwable {
-        return throwableSupplier.get();
+    public TimePair getTimePair() {
+        return timePair;
     }
 
-    public static TripleMessageProducer withSupplier(ThrowableSupplier<Object> supplier) {
-        return new TripleMessageProducer(supplier);
-    }
 }
