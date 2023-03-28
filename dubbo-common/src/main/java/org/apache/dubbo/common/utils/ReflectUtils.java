@@ -45,6 +45,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -146,6 +147,7 @@ public final class ReflectUtils {
     }
 
     private ReflectUtils() {
+        throw new UnsupportedOperationException("No instance of 'ReflectUtils' for you! ");
     }
 
     public static boolean isPrimitives(Class<?> cls) {
@@ -1391,6 +1393,58 @@ public final class ReflectUtils {
             return (T) field.get(obj);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public static Object getStaticFieldValue(Class<?> clazz, String staticFieldName) {
+        Objects.requireNonNull(clazz);
+
+        try {
+            Field field = clazz.getDeclaredField(staticFieldName);
+
+            if (!Modifier.isStatic(field.getModifiers())) {
+                throw new IllegalArgumentException("This method supports static field only! ");
+            }
+
+            field.setAccessible(true);
+
+            return field.get(null);
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException("No such field or the field is not accessible! ", e);
+        }
+    }
+
+    public static void setStaticFieldValue(Class<?> clazz, String staticFieldName, Object targetValue) {
+        Objects.requireNonNull(clazz);
+
+        try {
+            Field field = clazz.getDeclaredField(staticFieldName);
+
+            if (!Modifier.isStatic(field.getModifiers())) {
+                throw new IllegalArgumentException("This method supports static field only! ");
+            }
+
+            field.setAccessible(true);
+
+            field.set(null, targetValue);
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException("No such field or the field is not accessible! ", e);
+        }
+    }
+
+    public static void setFieldValue(Object targetObject, String fieldName, Object targetValue) {
+        Objects.requireNonNull(targetObject);
+
+        try {
+            Field field = targetObject.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+
+            field.set(targetObject, targetValue);
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException("No such field or the field is not accessible! ", e);
         }
     }
 }

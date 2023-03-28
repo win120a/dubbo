@@ -554,4 +554,39 @@ class ReflectUtilsTest {
             return null;
         }
     }
+
+
+    @Test
+    void testGetStaticFieldValue() {
+        Assertions.assertEquals(
+            System.out,
+            ReflectUtils.getStaticFieldValue(System.class, "out")
+        );
+    }
+
+    @Test
+    void testGetStaticFieldValueNonStaticField() {
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> ReflectUtils.getStaticFieldValue(ArrayList.class, "size")
+        );
+    }
+
+    @Test
+    void testSetFieldValue() {
+        EmptyClass ec = new EmptyClass();
+
+        ReflectUtils.setFieldValue(ec, "set", true);
+        Assertions.assertTrue(ec.isSet());
+
+        ReflectUtils.setFieldValue(ec, "set", false);
+        Assertions.assertFalse(ec.isSet());
+    }
+
+    @Test
+    void testSetStaticFieldValue() {
+        ReflectUtils.setStaticFieldValue(EmptyClass.class, "s", "s1");
+
+        Assertions.assertEquals("s1", EmptyClass.s);
+    }
 }
