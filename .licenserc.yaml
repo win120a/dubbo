@@ -99,6 +99,7 @@ header:
     - 'dubbo-native/src/main/java/org/apache/dubbo/aot/generate/ExecutableMode.java'
     - 'dubbo-native/src/main/java/org/apache/dubbo/aot/generate/MemberCategory.java'
     - 'dubbo-annotation-processor/src/main/java/org/apache/dubbo/annotation/permit/**'
+    - 'dubbo-annotation-processor/src/main/resources/spi-config/META-INF/services/javax.annotation.processing.Processor'
 
   comment: on-failure
 
