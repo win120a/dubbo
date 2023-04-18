@@ -440,12 +440,14 @@ jobs:
           ./target/dubbo-demo-native-consumer
 
   comment-test:
-    - permissions:
+    permissions:
       issues: write
-    - name: Create comment
-      uses: peter-evans/create-or-update-comment@v3
-      with:
-        issue-number: 1
-        body: |
-          Welcome back!
-        reactions: '+1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: 1
+          body: |
+            Welcome back!
+          reactions: '+1'
