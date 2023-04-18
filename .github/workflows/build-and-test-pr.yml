@@ -441,8 +441,7 @@ jobs:
 
   comment-test:
     - permissions:
-        issue:
-          write
+      issues: write
     - name: Create comment
       uses: peter-evans/create-or-update-comment@v3
       with:
