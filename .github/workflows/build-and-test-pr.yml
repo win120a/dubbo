@@ -438,3 +438,15 @@ jobs:
           cd ${{ github.workspace }}/dubbo/dubbo-demo/dubbo-demo-native/dubbo-demo-native-consumer
           ${{ github.workspace }}/dubbo/mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean package -P native -Dmaven.test.skip=true native:compile
           ./target/dubbo-demo-native-consumer
+
+  comment-test:
+    - permissions:
+        issue:
+          write
+    - name: Create comment
+      uses: peter-evans/create-or-update-comment@v3
+      with:
+        issue-number: 1
+        body: |
+          Welcome back!
+        reactions: '+1'
