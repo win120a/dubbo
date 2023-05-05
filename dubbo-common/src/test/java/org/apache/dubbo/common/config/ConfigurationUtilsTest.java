@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.common.config;
 
+import org.apache.dubbo.common.utils.ReflectUtils;
 import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.apache.dubbo.rpc.model.FrameworkModel;
 import org.apache.dubbo.rpc.model.ModuleModel;
@@ -39,7 +40,7 @@ class ConfigurationUtilsTest {
         ApplicationModel applicationModel = frameworkModel.newApplication();
         Environment originApplicationEnvironment = applicationModel.getModelEnvironment();
         Environment applicationEnvironment = Mockito.spy(originApplicationEnvironment);
-        applicationModel.setEnvironment(applicationEnvironment);
+        setEnvironment(applicationModel, applicationEnvironment);
 
         Configuration configuration = Mockito.mock(Configuration.class);
         Mockito.when(applicationEnvironment.getDynamicGlobalConfiguration()).thenReturn(configuration);
@@ -54,7 +55,7 @@ class ConfigurationUtilsTest {
         ModuleModel moduleModel = applicationModel.newModule();
         ModuleEnvironment originModuleEnvironment = moduleModel.getModelEnvironment();
         ModuleEnvironment moduleEnvironment = Mockito.spy(originModuleEnvironment);
-        moduleModel.setModuleEnvironment(moduleEnvironment);
+        setModuleEnvironment(moduleModel, moduleEnvironment);
 
         Mockito.when(moduleEnvironment.getDynamicGlobalConfiguration()).thenReturn(configuration);
 
@@ -65,8 +66,8 @@ class ConfigurationUtilsTest {
         // cached key
         Assertions.assertEquals("b", ConfigurationUtils.getCachedDynamicProperty(moduleModel, "TestKey", "xxx"));
 
-        moduleModel.setModuleEnvironment(originModuleEnvironment);
-        applicationModel.setEnvironment(originApplicationEnvironment);
+        setModuleEnvironment(moduleModel, originModuleEnvironment);
+        setEnvironment(applicationModel, originApplicationEnvironment);
 
         frameworkModel.destroy();
     }
@@ -108,5 +109,13 @@ class ConfigurationUtilsTest {
         Map<String, String> result = ConfigurationUtils.parseProperties(p1);
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals("zookeeper://127.0.0.1:2181\\ndubbo.protocol.port=20880", result.get("dubbo.registry.address"));
+    }
+
+    private void setModuleEnvironment(ModuleModel moduleModel, ModuleEnvironment targetModuleEnvironment) {
+        ReflectUtils.setFieldValue(moduleModel, "moduleEnvironment", targetModuleEnvironment);
+    }
+
+    private void setEnvironment(ApplicationModel applicationModel, Environment environment) {
+        ReflectUtils.setFieldValue(applicationModel, "environment", environment);
     }
 }

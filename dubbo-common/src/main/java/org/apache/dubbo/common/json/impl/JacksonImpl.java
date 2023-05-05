@@ -26,8 +26,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.reflect.Type;
 import java.util.List;
 
-public class JacksonImpl extends AbstractJSONImpl {
-    private ObjectMapper objectMapper = new ObjectMapper();
+public class JacksonImpl extends AbstractJsonUtilImpl {
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private volatile Object jacksonCache = null;
 

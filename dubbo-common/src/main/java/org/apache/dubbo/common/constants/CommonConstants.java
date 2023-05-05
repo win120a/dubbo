@@ -118,8 +118,6 @@ public interface CommonConstants {
 
     String CONSUMER_SHARED_EXECUTOR_SERVICE_COMPONENT_KEY = "CONSUMER_SHARED_SERVICE_EXECUTOR";
 
-    String INTERNAL_EXECUTOR_SERVICE_COMPONENT_KEY = "INTERNAL_SERVICE_EXECUTOR";
-
     String THREADPOOL_KEY = "threadpool";
 
     String THREAD_NAME_KEY = "threadname";
@@ -277,6 +275,7 @@ public interface CommonConstants {
     int MAX_PROXY_COUNT = 65535;
 
     String MONITOR_KEY = "monitor";
+    String BACKGROUND_KEY = "background";
     String CLUSTER_KEY = "cluster";
     String USERNAME_KEY = "username";
     String PASSWORD_KEY = "password";
@@ -315,6 +314,7 @@ public interface CommonConstants {
     String HEARTBEAT_EVENT = null;
     String MOCK_HEARTBEAT_EVENT = "H";
     String READONLY_EVENT = "R";
+    String WRITEABLE_EVENT = "W";
 
     String REFERENCE_FILTER_KEY = "reference.filter";
 
@@ -626,6 +626,13 @@ public interface CommonConstants {
     String BYTE_ACCESSOR_KEY = "byte.accessor";
 
     String PAYLOAD = "payload";
-    
+
     String DUBBO_METRICS_CONFIGCENTER_ENABLE = "dubbo.metrics.configcenter.enable";
+
+    Integer TRI_EXCEPTION_CODE_NOT_EXISTS = 0;
+
+    String PACKABLE_METHOD_FACTORY_KEY = "serialize.packable.factory";
+
+    String DUBBO_PACKABLE_METHOD_FACTORY = "dubbo.application.parameters." + PACKABLE_METHOD_FACTORY_KEY;
+
 }

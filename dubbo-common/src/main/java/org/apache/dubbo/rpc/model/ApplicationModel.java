@@ -457,24 +457,8 @@ public class ApplicationModel extends ScopeModel {
      * @deprecated only for ut
      */
     @Deprecated
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
-
-    /**
-     * @deprecated only for ut
-     */
-    @Deprecated
     public void setConfigManager(ConfigManager configManager) {
         this.configManager = configManager;
-    }
-
-    /**
-     * @deprecated only for ut
-     */
-    @Deprecated
-    public void setServiceRepository(ServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
     }
 
     // =============================== Deprecated Methods End =======================================

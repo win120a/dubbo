@@ -22,8 +22,8 @@ import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.metrics.TestMetricsInvoker;
 import org.apache.dubbo.metrics.collector.DefaultMetricsCollector;
-import org.apache.dubbo.metrics.model.MetricsKey;
-import org.apache.dubbo.metrics.model.sample.GaugeMetricSample;
+import org.apache.dubbo.metrics.model.key.MetricsKey;
+import org.apache.dubbo.metrics.model.sample.CounterMetricSample;
 import org.apache.dubbo.metrics.model.sample.MetricSample;
 import org.apache.dubbo.rpc.AppResponse;
 import org.apache.dubbo.rpc.Invoker;
@@ -32,7 +32,6 @@ import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.RpcInvocation;
 import org.apache.dubbo.rpc.model.ApplicationModel;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -108,6 +107,8 @@ class MetricsFilterTest {
         metricsMap.remove(MetricsKey.APPLICATION_METRIC_INFO.getName());
         Assertions.assertTrue(metricsMap.isEmpty());
     }
+
+
 
     @Test
     void testUnknownFailedRequests() {
@@ -186,10 +187,10 @@ class MetricsFilterTest {
         Assertions.assertTrue(metricsMap.containsKey(MetricsKey.METRIC_REQUESTS_TOTAL_FAILED.getNameByType(side)));
 
         MetricSample timeoutSample = metricsMap.get(MetricsKey.METRIC_REQUESTS_TIMEOUT.getNameByType(side));
-        Assertions.assertSame(((GaugeMetricSample) timeoutSample).applyAsLong(), count);
+        Assertions.assertSame(((CounterMetricSample) timeoutSample).getValue().longValue(), count);
 
-        GaugeMetricSample failedSample = (GaugeMetricSample) metricsMap.get(MetricsKey.METRIC_REQUESTS_TOTAL_FAILED.getNameByType(side));
-        Assertions.assertSame(failedSample.applyAsLong(), count);
+        CounterMetricSample failedSample = (CounterMetricSample) metricsMap.get(MetricsKey.METRIC_REQUESTS_TOTAL_FAILED.getNameByType(side));
+        Assertions.assertSame(failedSample.getValue().longValue(), count);
     }
 
     @Test
@@ -214,7 +215,7 @@ class MetricsFilterTest {
 
         MetricSample sample = metricsMap.get(MetricsKey.METRIC_REQUESTS_LIMIT.getNameByType(side));
 
-        Assertions.assertSame(((GaugeMetricSample) sample).applyAsLong(), count);
+        Assertions.assertSame(((CounterMetricSample) sample).getValue().longValue(), count);
     }
 
     @Test
@@ -265,13 +266,12 @@ class MetricsFilterTest {
 
     @Test
     public void testErrors() {
-        testFilterError(RpcException.SERIALIZATION_EXCEPTION,
-            MetricsKey.METRIC_REQUESTS_CODEC_FAILED.getNameByType(side));
-        testFilterError(RpcException.NETWORK_EXCEPTION,
-            MetricsKey.METRIC_REQUESTS_NETWORK_FAILED.getNameByType(side));
+        testFilterError(RpcException.SERIALIZATION_EXCEPTION, MetricsKey.METRIC_REQUESTS_CODEC_FAILED.formatName(side));
+        testFilterError(RpcException.NETWORK_EXCEPTION, MetricsKey.METRIC_REQUESTS_NETWORK_FAILED.formatName(side));
     }
 
-    private void testFilterError(int errorCode, String name) {
+
+    private void testFilterError(int errorCode, MetricsKey metricsKey) {
         setup();
         collector.setCollectEnabled(true);
         given(invoker.invoke(invocation)).willThrow(new RpcException(errorCode));
@@ -288,14 +288,14 @@ class MetricsFilterTest {
             }
         }
         Map<String, MetricSample> metricsMap = getMetricsMap();
-        Assertions.assertTrue(metricsMap.containsKey(name));
+        Assertions.assertTrue(metricsMap.containsKey(metricsKey.getName()));
 
-        MetricSample sample = metricsMap.get(name);
+        MetricSample sample = metricsMap.get(metricsKey.getName());
 
-        Assertions.assertSame(((GaugeMetricSample) sample).applyAsLong(), count);
+        Assertions.assertSame(((CounterMetricSample) sample).getValue().longValue(), count);
 
 
-        Assertions.assertTrue(metricsMap.containsKey(name));
+        Assertions.assertTrue(metricsMap.containsKey(metricsKey.getName()));
         Map<String, String> tags = sample.getTags();
 
         Assertions.assertEquals(tags.get(TAG_INTERFACE_KEY), INTERFACE_NAME);

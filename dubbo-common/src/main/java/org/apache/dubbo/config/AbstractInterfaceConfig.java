@@ -18,6 +18,7 @@ package org.apache.dubbo.config;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.Version;
+import org.apache.dubbo.common.aot.NativeDetector;
 import org.apache.dubbo.common.config.ConfigurationUtils;
 import org.apache.dubbo.common.config.Environment;
 import org.apache.dubbo.common.config.InmemoryConfiguration;
@@ -47,7 +48,6 @@ import java.util.stream.Collectors;
 import static org.apache.dubbo.common.constants.CommonConstants.COMMA_SPLIT_PATTERN;
 import static org.apache.dubbo.common.constants.CommonConstants.DUBBO_VERSION_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.INVOKER_LISTENER_KEY;
-import static org.apache.dubbo.common.constants.CommonConstants.NATIVE;
 import static org.apache.dubbo.common.constants.CommonConstants.PID_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.REFERENCE_FILTER_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.RELEASE_KEY;
@@ -292,8 +292,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
      * @return
      */
     protected String[] methods(Class<?> interfaceClass) {
-        boolean isNative = getEnvironment().getConfiguration().getBoolean(NATIVE, false);
-        if (isNative) {
+        if (NativeDetector.inNativeImage()) {
             return Arrays.stream(interfaceClass.getMethods()).map(Method::getName).toArray(String[]::new);
         } else {
             return ClassUtils.getMethodNames(interfaceClass);
@@ -314,7 +313,8 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 // There may be no interface class when generic call
                 return;
             }
-            if (!interfaceClass.isInterface()) {
+
+            if (!interfaceClass.isInterface() && !canSkipInterfaceCheck()) {
                 throw new IllegalStateException(interfaceName + " is not an interface");
             }
 
@@ -374,7 +374,16 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 
     }
 
-    private boolean verifyMethodConfig(MethodConfig methodConfig, Class<?> interfaceClass, boolean ignoreInvalidMethodConfig) {
+    /**
+     *  it is used for skipping the check of interface since dubbo 3.2
+     *  rest protocol allow the service is implement class
+     * @return
+     */
+    protected boolean canSkipInterfaceCheck() {
+        return false;
+    }
+
+    protected boolean verifyMethodConfig(MethodConfig methodConfig, Class<?> interfaceClass, boolean ignoreInvalidMethodConfig) {
         String methodName = methodConfig.getName();
         if (StringUtils.isEmpty(methodName)) {
             String msg = "<dubbo:method> name attribute is required! Please check: " +
@@ -396,7 +405,12 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 logger.warn(CONFIG_NO_METHOD_FOUND, "", "", msg);
                 return false;
             } else {
-                throw new IllegalStateException(msg);
+                if (!isNeedCheckMethod()) {
+                    msg = "Generic call: " + msg;
+                    logger.warn(CONFIG_NO_METHOD_FOUND, "", "", msg);
+                } else {
+                    throw new IllegalStateException(msg);
+                }
             }
         }
         return true;
@@ -411,6 +425,11 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             }
         }
         return null;
+    }
+
+    @Transient
+    protected boolean isNeedCheckMethod() {
+        return true;
     }
 
     private boolean hasArgumentConfigProps(Map<String, String> configProperties, String methodName, int argIndex) {
@@ -678,7 +697,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     }
 
     public void setRegistry(RegistryConfig registry) {
-        List<RegistryConfig> registries = new ArrayList<RegistryConfig>(1);
+        List<RegistryConfig> registries = new ArrayList<>(1);
         registries.add(registry);
         setRegistries(registries);
     }
@@ -706,7 +725,6 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         return methods;
     }
 
-    @SuppressWarnings("unchecked")
     public void setMethods(List<? extends MethodConfig> methods) {
         this.methods = (methods != null) ? new ArrayList<>(methods) : null;
     }
@@ -913,4 +931,5 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     public void setInterfaceClassLoader(ClassLoader interfaceClassLoader) {
         this.interfaceClassLoader = interfaceClassLoader;
     }
+
 }

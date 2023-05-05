@@ -25,10 +25,12 @@ import org.apache.dubbo.qos.command.impl.DisableSimpleProfiler;
 import org.apache.dubbo.qos.command.impl.EnableDetailProfiler;
 import org.apache.dubbo.qos.command.impl.EnableRouterSnapshot;
 import org.apache.dubbo.qos.command.impl.EnableSimpleProfiler;
+import org.apache.dubbo.qos.command.impl.GetAddress;
 import org.apache.dubbo.qos.command.impl.GetConfig;
 import org.apache.dubbo.qos.command.impl.GetEnabledRouterSnapshot;
 import org.apache.dubbo.qos.command.impl.GetRecentRouterSnapshot;
 import org.apache.dubbo.qos.command.impl.GetRouterSnapshot;
+import org.apache.dubbo.qos.command.impl.GracefulShutdown;
 import org.apache.dubbo.qos.command.impl.Help;
 import org.apache.dubbo.qos.command.impl.InvokeTelnet;
 import org.apache.dubbo.qos.command.impl.Live;
@@ -121,6 +123,8 @@ class CommandHelperTest {
         expectedClasses.add(SerializeCheckStatus.class);
         expectedClasses.add(SerializeWarnedClasses.class);
         expectedClasses.add(GetConfig.class);
+        expectedClasses.add(GetAddress.class);
+        expectedClasses.add(GracefulShutdown.class);
         assertThat(classes, containsInAnyOrder(expectedClasses.toArray(new Class<?>[0])));
     }
 

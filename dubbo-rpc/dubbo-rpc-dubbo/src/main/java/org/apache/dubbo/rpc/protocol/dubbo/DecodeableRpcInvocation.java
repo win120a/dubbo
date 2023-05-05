@@ -16,20 +16,22 @@
  */
 package org.apache.dubbo.rpc.protocol.dubbo;
 
-import org.apache.dubbo.common.utils.CacheableSupplier;
 import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
 import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.serialize.Cleanable;
 import org.apache.dubbo.common.serialize.ObjectInput;
 import org.apache.dubbo.common.utils.Assert;
+import org.apache.dubbo.common.utils.CacheableSupplier;
 import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.common.utils.ReflectUtils;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.Codec;
 import org.apache.dubbo.remoting.Decodeable;
+import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.remoting.exchange.Request;
 import org.apache.dubbo.remoting.transport.CodecSupport;
+import org.apache.dubbo.remoting.transport.ExceedPayloadLimitException;
 import org.apache.dubbo.rpc.RpcInvocation;
 import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.apache.dubbo.rpc.model.FrameworkModel;
@@ -38,6 +40,7 @@ import org.apache.dubbo.rpc.model.MethodDescriptor;
 import org.apache.dubbo.rpc.model.ModuleModel;
 import org.apache.dubbo.rpc.model.ProviderModel;
 import org.apache.dubbo.rpc.model.ServiceDescriptor;
+import org.apache.dubbo.rpc.protocol.PermittedSerializationKeeper;
 import org.apache.dubbo.rpc.support.RpcUtils;
 
 import java.io.IOException;
@@ -52,8 +55,10 @@ import static org.apache.dubbo.common.URL.buildKey;
 import static org.apache.dubbo.common.constants.CommonConstants.DUBBO_VERSION_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.GROUP_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.PATH_KEY;
+import static org.apache.dubbo.common.constants.CommonConstants.PAYLOAD;
 import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.PROTOCOL_FAILED_DECODE;
+import static org.apache.dubbo.common.constants.LoggerCodeConstants.TRANSPORT_EXCEED_PAYLOAD_LIMIT;
 import static org.apache.dubbo.rpc.Constants.SERIALIZATION_ID_KEY;
 import static org.apache.dubbo.rpc.Constants.SERIALIZATION_SECURITY_CHECK_KEY;
 
@@ -74,6 +79,8 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
     protected final FrameworkModel frameworkModel;
 
     protected final transient Supplier<CallbackServiceCodec> callbackServiceCodecFactory;
+
+    private static final boolean CHECK_SERIALIZATION = Boolean.parseBoolean(System.getProperty(SERIALIZATION_SECURITY_CHECK_KEY, "true"));
 
     public DecodeableRpcInvocation(FrameworkModel frameworkModel, Channel channel, Request request, InputStream is, byte id) {
         this.frameworkModel = frameworkModel;
@@ -125,6 +132,10 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
         String version = in.readUTF();
         setAttachment(VERSION_KEY, version);
 
+        // Do provider-level payload checks.
+        String keyWithoutGroup = keyWithoutGroup(path, version);
+        checkPayload(keyWithoutGroup);
+
         setMethodName(in.readUTF());
 
         String desc = in.readUTF();
@@ -132,8 +143,11 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
 
         ClassLoader originClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            if (Boolean.parseBoolean(System.getProperty(SERIALIZATION_SECURITY_CHECK_KEY, "true"))) {
-                CodecSupport.checkSerialization(frameworkModel.getServiceRepository(), path, version, serializationType);
+            if (CHECK_SERIALIZATION) {
+                PermittedSerializationKeeper keeper = frameworkModel.getBeanFactory().getBean(PermittedSerializationKeeper.class);
+                if (!keeper.checkSerializationPermitted(keyWithoutGroup, serializationType)) {
+                    throw new IOException("Unexpected serialization id:" + serializationType + " received from network, please check if the peer send the right id.");
+                }
             }
             Object[] args = DubboCodec.EMPTY_OBJECT_ARRAY;
             Class<?>[] pts = DubboCodec.EMPTY_CLASS_ARRAY;
@@ -247,5 +261,29 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
             args[i] = in.readObject(pts[i]);
         }
         return args;
+    }
+
+    private void checkPayload(String serviceKey) throws IOException {
+        ProviderModel providerModel =
+            frameworkModel.getServiceRepository().lookupExportedServiceWithoutGroup(serviceKey);
+        if (providerModel != null) {
+            String payloadStr = (String) providerModel.getServiceMetadata().getAttachments().get(PAYLOAD);
+            if (payloadStr != null) {
+                int payload = Integer.parseInt(payloadStr);
+                if (payload <= 0) {
+                    return;
+                }
+                if (request.getPayload() > payload) {
+                    ExceedPayloadLimitException e = new ExceedPayloadLimitException(
+                        "Data length too large: " + request.getPayload() + ", max payload: " + payload + ", channel: " + channel);
+                    log.error(TRANSPORT_EXCEED_PAYLOAD_LIMIT, "", "", e.getMessage(), e);
+                    throw e;
+                }
+            }
+        }
+    }
+
+    protected void fillInvoker(DubboProtocol dubboProtocol) throws RemotingException {
+        this.setInvoker(dubboProtocol.getInvoker(channel, this));
     }
 }
