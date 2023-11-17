@@ -848,6 +848,13 @@
     </profile>
 
     <profile>
+      <id>turn-off-spotless</id>
+      <properties>
+        <spotless.check.skip>true</spotless.check.skip>
+      </properties>
+    </profile>
+
+    <profile>
       <id>java11+</id>
       <activation>
         <jdk>[11,)</jdk>
