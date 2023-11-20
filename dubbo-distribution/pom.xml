@@ -32,6 +32,7 @@
     <spotless.action>check</spotless.action>
     <dubbo-shared-resources.version>1.0.0</dubbo-shared-resources.version>
     <palantirJavaFormat.version>2.38.0</palantirJavaFormat.version>
+    <spotless.check.skip>true</spotless.check.skip>
   </properties>
 
   <profiles>
@@ -116,9 +117,9 @@
     </profile>
 
     <profile>
-      <id>turn-off-spotless</id>
+      <id>spotless</id>
       <properties>
-        <spotless.check.skip>true</spotless.check.skip>
+        <spotless.check.skip>false</spotless.check.skip>
       </properties>
     </profile>
   </profiles>

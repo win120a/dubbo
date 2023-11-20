@@ -159,10 +159,11 @@
     <maven_os_plugin_version>1.7.1</maven_os_plugin_version>
     <maven_protobuf_plugin_version>0.6.1</maven_protobuf_plugin_version>
     <arguments />
+
     <checkstyle.skip>true</checkstyle.skip>
     <checkstyle_unix.skip>true</checkstyle_unix.skip>
-    <rat.skip>true</rat.skip>
     <jacoco.skip>true</jacoco.skip>
+    <spotless.check.skip>true</spotless.check.skip>
 
     <jprotoc_version>1.2.2</jprotoc_version>
     <protobuf-java_version>3.22.3</protobuf-java_version>
@@ -848,9 +849,9 @@
     </profile>
 
     <profile>
-      <id>turn-off-spotless</id>
+      <id>spotless</id>
       <properties>
-        <spotless.check.skip>true</spotless.check.skip>
+        <spotless.check.skip>false</spotless.check.skip>
       </properties>
     </profile>
 
